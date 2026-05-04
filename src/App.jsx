@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Pricing from './pages/Pricing';
 import ChatbotBuilder from './pages/ChatbotBuilder';
+import Chat from './pages/Chat';
 import './index.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/builder" element={<ChatbotBuilder />} />
+        <Route path="/chat" element={<Chat />} />
       </Routes>
     </Router>
   );

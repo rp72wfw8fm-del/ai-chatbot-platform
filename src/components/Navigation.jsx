@@ -11,6 +11,7 @@ export default function Navigation() {
         </Link>
         <div className="flex gap-6 items-center">
           <Link to="/" className="hover:text-primary transition">Home</Link>
+          <Link to="/chat" className="hover:text-primary transition">Chat</Link>
           <Link to="/pricing" className="hover:text-primary transition">Pricing</Link>
           <Link to="/dashboard" className="btn-primary">Dashboard</Link>
         </div>
