@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
@@ -36,24 +35,25 @@ export default function Login() {
         throw new Error('Please enter email and password');
       }
 
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+      // Sign in with Supabase
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      });
 
-      console.log('User logged in:', userCredential.user);
+      if (signInError) throw signInError;
+
+      console.log('User logged in:', data.user);
+      
       alert('Logged in successfully! Redirecting to dashboard...');
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       
-      if (err.code === 'auth/user-not-found') {
-        setError('No account found with this email. Please sign up first.');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Incorrect password. Please try again.');
-      } else if (err.code === 'auth/invalid-email') {
-        setError('Invalid email address.');
+      if (err.message.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please try again.');
+      } else if (err.message.includes('Email not confirmed')) {
+        setError('Please confirm your email before logging in.');
       } else {
         setError(err.message || 'Failed to log in. Please try again.');
       }

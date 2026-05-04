@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
@@ -28,7 +27,7 @@ export default function SignUp() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    setError(''); // Clear error when user starts typing
+    setError('');
   };
 
   const handleSubmit = async (e) => {
@@ -58,17 +57,26 @@ export default function SignUp() {
         throw new Error('Please agree to the Terms of Service');
       }
 
-      // Create user with Firebase
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+      // Sign up with Supabase
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            phone: formData.phone,
+            company: formData.company,
+            account_type: accountType
+          }
+        }
+      });
 
-      console.log('User created:', userCredential.user);
+      if (signUpError) throw signUpError;
+
+      console.log('User created:', data.user);
       
       // Show success message
-      alert('Account created successfully! Redirecting to dashboard...');
+      alert('Account created successfully! Please check your email to confirm. Redirecting to dashboard...');
       
       // Redirect to dashboard
       navigate('/dashboard');
