@@ -17,26 +17,37 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInput(value);
+  };
 
-    // Add user message
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    
+    // Ensure input is properly captured
+    const messageText = input.trim();
+    if (!messageText) return;
+
+    // Add user message with full text
     const userMessage = {
       id: messages.length + 1,
-      text: input,
+      text: messageText,
       sender: 'user',
       timestamp: new Date()
     };
+    
     setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    setInput(''); // Clear input after sending
     setLoading(true);
 
     // Simulate bot response (in production, this would call your AI API)
@@ -83,13 +94,13 @@ export default function Chat() {
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg break-words ${
+                    className={`px-4 py-3 rounded-lg ${
                       message.sender === 'user'
-                        ? 'bg-blue-500 text-white rounded-br-none'
-                        : 'bg-gray-200 text-gray-900 rounded-bl-none'
+                        ? 'bg-blue-500 text-white rounded-br-none max-w-xs lg:max-w-md'
+                        : 'bg-gray-200 text-gray-900 rounded-bl-none max-w-xs lg:max-w-md'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                    <p className="text-sm break-words whitespace-normal">{message.text}</p>
                     <span className="text-xs opacity-70 mt-1 block">
                       {message.timestamp.toLocaleTimeString([], {
                         hour: '2-digit',
@@ -117,10 +128,11 @@ export default function Chat() {
                 <input
                   type="text"
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder="Ask me anything..."
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={loading}
+                  autoComplete="off"
                 />
                 <button
                   type="submit"
