@@ -1,0 +1,21 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import Pricing from './pages/Pricing';
+import ChatbotBuilder from './pages/ChatbotBuilder';
+import './index.css';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/builder" element={<ChatbotBuilder />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
