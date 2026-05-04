@@ -13,7 +13,8 @@ export default function Navigation() {
           <Link to="/" className="hover:text-primary transition">Home</Link>
           <Link to="/chat" className="hover:text-primary transition">Chat</Link>
           <Link to="/pricing" className="hover:text-primary transition">Pricing</Link>
-          <Link to="/dashboard" className="btn-primary">Dashboard</Link>
+          <Link to="/login" className="hover:text-primary transition">Sign In</Link>
+          <Link to="/signup" className="btn-primary">Sign Up</Link>
         </div>
       </div>
     </nav>

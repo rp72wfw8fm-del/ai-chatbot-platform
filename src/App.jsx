@@ -4,6 +4,9 @@ import Dashboard from './pages/Dashboard';
 import Pricing from './pages/Pricing';
 import ChatbotBuilder from './pages/ChatbotBuilder';
 import Chat from './pages/Chat';
+import SignUp from './pages/SignUp';
+import Login from './pages/Login';
+import Payment from './pages/Payment';
 import './index.css';
 
 function App() {
@@ -11,6 +14,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/payment" element={<Payment />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/builder" element={<ChatbotBuilder />} />
