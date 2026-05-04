@@ -83,13 +83,13 @@ export default function Chat() {
                   className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+                    className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg break-words ${
                       message.sender === 'user'
                         ? 'bg-blue-500 text-white rounded-br-none'
                         : 'bg-gray-200 text-gray-900 rounded-bl-none'
                     }`}
                   >
-                    <p className="text-sm">{message.text}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                     <span className="text-xs opacity-70 mt-1 block">
                       {message.timestamp.toLocaleTimeString([], {
                         hour: '2-digit',
