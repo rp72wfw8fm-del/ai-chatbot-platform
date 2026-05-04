@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,12 +23,43 @@ export default function Login() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login:', formData);
-    alert('Login successful! Redirecting to dashboard...');
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!formData.email || !formData.password) {
+        throw new Error('Please enter email and password');
+      }
+
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      console.log('User logged in:', userCredential.user);
+      alert('Logged in successfully! Redirecting to dashboard...');
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      
+      if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email. Please sign up first.');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('Incorrect password. Please try again.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Invalid email address.');
+      } else {
+        setError(err.message || 'Failed to log in. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,17 +71,24 @@ export default function Login() {
           <h1 className="text-4xl font-black mb-2 text-center">Welcome Back</h1>
           <p className="text-center text-gray-600 mb-8">Sign in to your ChatBot Pro account</p>
 
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md space-y-4">
             <div>
-              <label className="block text-sm font-semibold mb-2">Email</label>
+              <label className="block text-sm font-semibold mb-2">Email Address</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="john@example.com"
+                placeholder="name@example.com"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -59,11 +103,13 @@ export default function Login() {
                   placeholder="••••••••"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-2.5 text-gray-500"
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -78,19 +124,21 @@ export default function Login() {
                   checked={formData.rememberMe}
                   onChange={handleChange}
                   className="w-4 h-4 text-blue-500 rounded"
+                  disabled={loading}
                 />
                 <label className="ml-2 text-sm text-gray-600">Remember me</label>
               </div>
-              <a href="/forgot-password" className="text-sm text-blue-500 hover:text-blue-600">
+              <a href="#" className="text-sm text-blue-500 hover:text-blue-600 font-semibold">
                 Forgot password?
               </a>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition"
+              disabled={loading}
+              className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-3 rounded-lg font-semibold transition"
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
 
             <p className="text-center text-sm text-gray-600">
@@ -101,25 +149,11 @@ export default function Login() {
             </p>
           </form>
 
-          {/* Social Login */}
-          <div className="mt-8">
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button className="py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold transition">
-                Google
-              </button>
-              <button className="py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold transition">
-                Facebook
-              </button>
-            </div>
+          {/* Demo Credentials */}
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm font-semibold text-blue-900 mb-2">Demo Credentials:</p>
+            <p className="text-sm text-blue-700">Email: demo@example.com</p>
+            <p className="text-sm text-blue-700">Password: demo123456</p>
           </div>
         </div>
       </section>

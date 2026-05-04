@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Pricing from './pages/Pricing';
@@ -12,7 +13,8 @@ import './index.css';
 function App() {
   return (
     <Router>
-      <Routes>
+      <AuthProvider>
+        <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
@@ -21,7 +23,8 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/builder" element={<ChatbotBuilder />} />
         <Route path="/chat" element={<Chat />} />
-      </Routes>
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

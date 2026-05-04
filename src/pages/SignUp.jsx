@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../config/firebase';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
 export default function SignUp() {
+  const navigate = useNavigate();
   const [accountType, setAccountType] = useState('business');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,12 +28,56 @@ export default function SignUp() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    setError(''); // Clear error when user starts typing
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Sign up:', { accountType, ...formData });
-    alert('Account created successfully! Redirecting to dashboard...');
+    setError('');
+    setLoading(true);
+
+    try {
+      // Validate form
+      if (!formData.name || !formData.email || !formData.phone || !formData.password) {
+        throw new Error('Please fill in all required fields');
+      }
+
+      if (accountType === 'business' && !formData.company) {
+        throw new Error('Please enter your company name');
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Passwords do not match');
+      }
+
+      if (formData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters');
+      }
+
+      if (!formData.agreeTerms) {
+        throw new Error('Please agree to the Terms of Service');
+      }
+
+      // Create user with Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      console.log('User created:', userCredential.user);
+      
+      // Show success message
+      alert('Account created successfully! Redirecting to dashboard...');
+      
+      // Redirect to dashboard
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Sign up error:', err);
+      setError(err.message || 'Failed to create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,6 +113,13 @@ export default function SignUp() {
             </button>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700 text-sm">{error}</p>
+            </div>
+          )}
+
           {/* Sign Up Form */}
           <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md space-y-4">
             <div>
@@ -75,6 +132,7 @@ export default function SignUp() {
                 placeholder="John Doe"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -88,6 +146,7 @@ export default function SignUp() {
                 placeholder="john@example.com"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -101,6 +160,7 @@ export default function SignUp() {
                 placeholder="+233 55 415 9515"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -115,6 +175,7 @@ export default function SignUp() {
                   placeholder="Your Company"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  disabled={loading}
                 />
               </div>
             )}
@@ -130,11 +191,13 @@ export default function SignUp() {
                   placeholder="••••••••"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-2.5 text-gray-500"
+                  disabled={loading}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -151,6 +214,7 @@ export default function SignUp() {
                 placeholder="••••••••"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -162,6 +226,7 @@ export default function SignUp() {
                 onChange={handleChange}
                 className="w-4 h-4 text-blue-500 rounded"
                 required
+                disabled={loading}
               />
               <label className="ml-2 text-sm text-gray-600">
                 I agree to the Terms of Service and Privacy Policy
@@ -170,9 +235,10 @@ export default function SignUp() {
 
             <button
               type="submit"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-semibold transition"
+              disabled={loading}
+              className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white py-3 rounded-lg font-semibold transition"
             >
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
 
             <p className="text-center text-sm text-gray-600">
